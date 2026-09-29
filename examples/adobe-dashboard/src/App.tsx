@@ -18,6 +18,7 @@ import {Text} from './components/Content';
 import {ListBox, ListBoxItem} from './components/ListBox';
 import {Menu, MenuItem, MenuTrigger} from './components/Menu';
 import {MyToastRegion} from './components/Toast';
+import {accountMenuItemLabels} from './accountMenuItems';
 import {type PageId} from './data';
 import Overview from './views/Overview';
 import Reports from './views/Reports';
@@ -46,9 +47,9 @@ export default function App() {
             <CircleUser />
           </Button>
           <Menu aria-label="Account">
-            <MenuItem id="profile">Profile</MenuItem>
-            <MenuItem id="preferences">Preferences</MenuItem>
-            <MenuItem id="sign-out">Logout</MenuItem>
+            <MenuItem id="profile">{accountMenuItemLabels.profile}</MenuItem>
+            <MenuItem id="preferences">{accountMenuItemLabels.preferences}</MenuItem>
+            <MenuItem id="sign-out">{accountMenuItemLabels.signOut}</MenuItem>
           </Menu>
         </MenuTrigger>
       </header>

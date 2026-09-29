@@ -12036,6 +12036,7 @@ __metadata:
     react-dom: "npm:^18.2.0"
     typescript: "npm:^5.2.2"
     vite: "npm:^8.0.0"
+    vitest: "npm:^4.0.17"
   languageName: unknown
   linkType: soft
 
