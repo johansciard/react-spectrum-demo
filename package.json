@@ -19,9 +19,11 @@
     "packages/dev/mcp/s2",
     "packages/dev/mcp/react-aria",
     "packages/dev/*",
-    "packages/@*/*"
+    "packages/@*/*",
+    "examples/adobe-dashboard"
   ],
   "scripts": {
+    "demo:update": "git pull && yarn install && yarn workspace adobe-dashboard dev",
     "check-types": "tsc --noEmit",
     "clean": "make clean",
     "clean:all": "make clean_all",

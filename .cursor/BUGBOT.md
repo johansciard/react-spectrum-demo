@@ -1,0 +1,1 @@
+Flag any change where a disabled item can still receive focus or selection.

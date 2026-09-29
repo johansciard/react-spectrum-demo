@@ -1,0 +1,8 @@
+---
+description: Adobe engineering standards
+alwaysApply: true
+---
+- Every interactive component must meet WCAG 2.2 AA.
+- Use Spectrum design tokens. Never hard-code colours or spacing.
+- Every bug fix adds or updates a test.
+- Keyboard behaviour must match the ARIA Authoring Practices pattern for that component.
