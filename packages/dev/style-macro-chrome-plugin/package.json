@@ -4,7 +4,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/react-spectrum"
+    "url": "https://github.com/johansciard/react-spectrum-demo"
   },
   "publishConfig": {
     "access": "public"

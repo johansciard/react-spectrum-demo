@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/react-spectrum"
+    "url": "https://github.com/johansciard/react-spectrum-demo"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.0",
