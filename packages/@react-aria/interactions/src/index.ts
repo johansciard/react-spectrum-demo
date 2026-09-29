@@ -32,7 +32,8 @@ export {useMove} from 'react-aria/useMove';
 export {usePress} from 'react-aria/usePress';
 export {useScrollWheel} from 'react-aria/private/interactions/useScrollWheel';
 export {useLongPress} from 'react-aria/useLongPress';
-export {FocusableProvider, FocusableContext} from 'react-aria/private/interactions/useFocusable';
+export {FocusableProvider} from 'react-aria/FocusableProvider';
+export {FocusableContext} from 'react-aria/private/interactions/useFocusable';
 export {useFocusable} from 'react-aria/useFocusable';
 export {Focusable} from 'react-aria/Focusable';
 export {focusSafely} from 'react-aria/private/interactions/focusSafely';
@@ -47,7 +48,7 @@ export type {PressProps, PressHookProps, PressResult} from 'react-aria/usePress'
 export type {MoveResult} from 'react-aria/useMove';
 export type {LongPressProps, LongPressResult} from 'react-aria/useLongPress';
 export type {ScrollWheelProps} from 'react-aria/private/interactions/useScrollWheel';
-export type {FocusableProviderProps} from 'react-aria/private/interactions/useFocusable';
+export type {FocusableProviderProps} from 'react-aria/FocusableProvider';
 export type {FocusableAria, FocusableOptions} from 'react-aria/useFocusable';
 export type {
   PressEvent,
