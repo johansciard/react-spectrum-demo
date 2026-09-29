@@ -48,7 +48,7 @@ export default function App() {
           <Menu aria-label="Account">
             <MenuItem id="profile">Profile</MenuItem>
             <MenuItem id="preferences">Preferences</MenuItem>
-            <MenuItem id="sign-out">Sign out</MenuItem>
+            <MenuItem id="sign-out">Logout</MenuItem>
           </Menu>
         </MenuTrigger>
       </header>
