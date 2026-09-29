@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/react-spectrum"
+    "url": "https://github.com/johansciard/react-spectrum-demo"
   },
   "source": "src/index.css",
   "main": "dist/index.css",
