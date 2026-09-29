@@ -1,8 +1,8 @@
+import {act, render, screen} from '@testing-library/react';
 import {HiddenSelect, HiddenSelectProps} from '../../src/select/HiddenSelect';
 import {Item} from 'react-stately/Item';
 import {pointerMap} from '@react-spectrum/test-utils-internal';
 import React, {useRef} from 'react';
-import {render, screen} from '@testing-library/react';
 import {SelectProps, useSelectState} from 'react-stately/useSelectState';
 import userEvent from '@testing-library/user-event';
 
@@ -77,17 +77,67 @@ describe('<HiddenSelect />', () => {
 
   it('should trigger on onSelectionChange when select onchange is triggered (autofill)', async () => {
     const onSelectionChange = jest.fn();
+    const onFormChange = jest.fn();
     render(
-      <HiddenSelectExample
-        label="select"
-        onSelectionChange={onSelectionChange}
-        items={makeItems(5)}
-      />
+      <form onChange={onFormChange}>
+        <HiddenSelectExample
+          label="select"
+          onSelectionChange={onSelectionChange}
+          items={makeItems(5)}
+        />
+      </form>
     );
 
     const select = screen.getByLabelText('select');
     await user.selectOptions(select, '5');
+    expect(onSelectionChange).toHaveBeenCalledTimes(1);
     expect(onSelectionChange).toHaveBeenCalledWith('5');
+    expect(onFormChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('should bubble a change event to the form when the selected key changes', async () => {
+    const onFormChange = jest.fn();
+    function Example() {
+      const triggerRef = useRef(null);
+      const state = useSelectState({
+        items: makeItems(5),
+        children: item => <Item>{item.value}</Item>
+      });
+
+      return (
+        <form onChange={onFormChange}>
+          <HiddenSelect label="select" state={state} triggerRef={triggerRef} />
+          <button type="button" ref={triggerRef} onClick={() => state.setSelectedKey('5')}>
+            choose
+          </button>
+        </form>
+      );
+    }
+
+    render(<Example />);
+    await user.click(screen.getByRole('button', {name: 'choose'}));
+    expect(onFormChange).toHaveBeenCalledTimes(1);
+    expect(onFormChange.mock.calls[0][0].target).toHaveValue('5');
+  });
+
+  it('should not bubble a change event when the form is reset', async () => {
+    const onFormChange = jest.fn();
+    let formRef = React.createRef<HTMLFormElement>();
+    render(
+      <form ref={formRef} onChange={onFormChange}>
+        <HiddenSelectExample label="select" defaultSelectedKey="5" items={makeItems(5)} />
+      </form>
+    );
+
+    const select = screen.getByLabelText('select');
+    await user.selectOptions(select, '1');
+    expect(onFormChange).toHaveBeenCalledTimes(1);
+    onFormChange.mockClear();
+
+    act(() => {
+      formRef.current!.reset();
+    });
+    expect(onFormChange).not.toHaveBeenCalled();
   });
 
   it('should include a non-empty placeholder option for native select markup', () => {
