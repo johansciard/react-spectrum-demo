@@ -16,6 +16,7 @@ import {Checkbox} from '../components/Checkbox';
 import {Form} from '../components/Form';
 import {Radio, RadioGroup} from '../components/RadioGroup';
 import {Switch} from '../components/Switch';
+import {ListBox, ListBoxItem} from '../components/ListBox';
 import {queue} from '../components/Toast';
 
 export default function Settings() {
@@ -51,6 +52,24 @@ export default function Settings() {
         </Checkbox>
         <Button type="submit">{saved ? 'Saved' : 'Save'}</Button>
       </Form>
+      <div className="settings-form">
+        <h3>Archived workspaces</h3>
+        <p className="page-lede">Archived workspaces are read-only.</p>
+        <ListBox
+          aria-label="Archived workspaces"
+          selectionMode="single"
+          isDisabled>
+          <ListBoxItem id="brand-2023" textValue="Brand 2023">
+            Brand 2023
+          </ListBoxItem>
+          <ListBoxItem id="summit-2024" textValue="Summit 2024">
+            Summit 2024
+          </ListBoxItem>
+          <ListBoxItem id="legacy-assets" textValue="Legacy Assets">
+            Legacy Assets
+          </ListBoxItem>
+        </ListBox>
+      </div>
     </section>
   );
 }

@@ -149,6 +149,12 @@ export interface ListBoxRenderProps {
    * State of the listbox.
    */
   state: ListState<unknown>;
+  /**
+   * Whether the entire listbox is disabled.
+   *
+   * @selector [data-disabled]
+   */
+  isDisabled: boolean;
 }
 
 export interface ListBoxProps<T>
@@ -191,6 +197,8 @@ export interface ListBoxProps<T>
    * @default 'vertical'
    */
   orientation?: Orientation;
+  /** Whether the entire ListBox is disabled. */
+  isDisabled?: boolean;
 }
 
 export const ListBoxContext = createContext<ContextValue<ListBoxProps<any>, HTMLDivElement>>(null);
@@ -239,7 +247,8 @@ interface ListBoxInnerProps<T> {
 function ListBoxInner<T>({state: inputState, props, listBoxRef}: ListBoxInnerProps<T>) {
   // oxlint-disable-next-line react/react-compiler
   [props, listBoxRef] = useContextProps(props, listBoxRef, SelectableCollectionContext);
-  let {dragAndDropHooks, layout = 'stack', orientation = 'vertical', filter} = props;
+  let {dragAndDropHooks, layout = 'stack', orientation = 'vertical', filter, isDisabled = false} =
+    props;
   // oxlint-disable-next-line react/react-compiler
   let state = UNSTABLE_useFilteredListState(inputState, filter);
   let {collection, selectionManager} = state;
@@ -370,6 +379,7 @@ function ListBoxInner<T>({state: inputState, props, listBoxRef}: ListBoxInnerPro
     isEmpty,
     isFocused,
     isFocusVisible,
+    isDisabled,
     layout: props.layout || 'stack',
     orientation,
     state
@@ -409,11 +419,13 @@ function ListBoxInner<T>({state: inputState, props, listBoxRef}: ListBoxInnerPro
         slot={props.slot || undefined}
         onScroll={props.onScroll}
         data-drop-target={isRootDropTarget || undefined}
+        data-disabled={isDisabled || undefined}
         data-empty={isEmpty || undefined}
         data-focused={isFocused || undefined}
         data-focus-visible={isFocusVisible || undefined}
         data-layout={props.layout || 'stack'}
-        data-orientation={orientation}>
+        data-orientation={orientation}
+        aria-disabled={isDisabled || undefined}>
         <Provider
           values={[
             [ListBoxContext, props],
@@ -540,6 +552,8 @@ export const ListBoxItem = /*#__PURE__*/ createLeafComponent(ItemNode, function 
 >(props: ListBoxItemProps<T>, forwardedRef: ForwardedRef<HTMLDivElement>, item: Node<T>) {
   let ref = useObjectRef<any>(forwardedRef);
   let state = useContext(ListStateContext)!;
+  let listBoxProps = useContext(ListBoxContext);
+  let isListDisabled = !!listBoxProps?.isDisabled;
   let {dragAndDropHooks, dragState, dropState} = useContext(DragAndDropContext)!;
   let isDraggable =
     dragState && !(dragState.isDisabled || dragState.selectionManager.isDisabled(item.key));
@@ -550,11 +564,24 @@ export const ListBoxItem = /*#__PURE__*/ createLeafComponent(ItemNode, function 
   );
 
   let {hoverProps, isHovered} = useHover({
-    isDisabled: !states.allowsSelection && !states.hasAction && !isDraggable,
+    isDisabled:
+      isListDisabled ||
+      (!states.allowsSelection && !states.hasAction && !isDraggable),
     onHoverStart: item.props.onHoverStart,
     onHoverChange: item.props.onHoverChange,
     onHoverEnd: item.props.onHoverEnd
   });
+
+  let blockPointerSelectionProps = isListDisabled
+    ? {
+        onPointerDownCapture(e: React.PointerEvent) {
+          if (e.pointerType !== 'keyboard') {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+      }
+    : null;
 
   let {keyboardProps} = useKeyboard(props);
   let {focusProps} = useFocus(props);
@@ -617,6 +644,7 @@ export const ListBoxItem = /*#__PURE__*/ createLeafComponent(ItemNode, function 
       {...mergeProps(
         DOMProps,
         renderProps,
+        blockPointerSelectionProps,
         optionProps,
         hoverProps,
         keyboardProps,
@@ -627,7 +655,7 @@ export const ListBoxItem = /*#__PURE__*/ createLeafComponent(ItemNode, function 
       ref={ref}
       data-allows-dragging={!!dragState || undefined}
       data-selected={states.isSelected || undefined}
-      data-disabled={states.isDisabled || undefined}
+      data-disabled={states.isDisabled || isListDisabled || undefined}
       data-hovered={isHovered || undefined}
       data-focused={states.isFocused || undefined}
       data-focus-visible={states.isFocusVisible || undefined}
