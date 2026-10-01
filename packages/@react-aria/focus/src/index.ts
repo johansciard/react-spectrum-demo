@@ -29,9 +29,9 @@ export type {FocusScopeProps, FocusManager, FocusManagerOptions} from 'react-ari
 export type {FocusRingProps} from 'react-aria/FocusRing';
 export type {AriaFocusRingProps, FocusRingAria} from 'react-aria/useFocusRing';
 export {isFocusable} from 'react-aria/private/utils/isFocusable';
-export {FocusableProvider} from 'react-aria/private/interactions/useFocusable';
+export {FocusableProvider} from 'react-aria/FocusableProvider';
 export {useFocusable} from 'react-aria/useFocusable';
 export {Focusable} from 'react-aria/Focusable';
 export {focusSafely} from 'react-aria/private/interactions/focusSafely';
-export type {FocusableProviderProps} from 'react-aria/private/interactions/useFocusable';
+export type {FocusableProviderProps} from 'react-aria/FocusableProvider';
 export type {FocusableAria, FocusableOptions} from 'react-aria/useFocusable';
