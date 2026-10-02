@@ -679,6 +679,39 @@ describe('Select', () => {
     expect(input).toHaveAttribute('form', 'test');
   });
 
+  it('should bubble a change event to the form when an option is selected', async () => {
+    let onFormChange = jest.fn();
+    let {getByTestId} = render(
+      <form data-testid="form" onChange={onFormChange}>
+        <TestSelect name="select" />
+      </form>
+    );
+    let selectTester = testUtilUser.createTester('Select', {root: getByTestId('select')});
+
+    await selectTester.toggleOptionSelection({option: 'Dog'});
+
+    expect(onFormChange).toHaveBeenCalledTimes(1);
+    expect(onFormChange.mock.calls[0][0].target).toHaveValue('dog');
+  });
+
+  it('should not emit duplicate form change events for multiple selection', async () => {
+    let onChange = jest.fn();
+    let onFormChange = jest.fn();
+    let {getByTestId} = render(
+      <form data-testid="form" onChange={onFormChange}>
+        <TestSelect name="select" selectionMode="multiple" onChange={onChange} />
+      </form>
+    );
+    let selectTester = testUtilUser.createTester('Select', {root: getByTestId('select')});
+
+    await selectTester.toggleOptionSelection({option: 'Cat'});
+    await selectTester.toggleOptionSelection({option: 'Dog'});
+
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).toHaveBeenLastCalledWith(['cat', 'dog']);
+    expect(onFormChange).toHaveBeenCalledTimes(2);
+  });
+
   it('should not submit if required and selectedKey is null', async () => {
     const onSubmit = jest.fn().mockImplementation(e => e.preventDefault());
 

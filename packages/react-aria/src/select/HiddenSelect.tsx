@@ -14,10 +14,13 @@ import {FocusableElement, Key, RefObject} from '@react-types/shared';
 import {getEventTarget} from '../utils/shadowdom/DOMFunctions';
 import React, {InputHTMLAttributes, JSX, ReactNode, useCallback, useRef} from 'react';
 import {selectData} from './useSelect';
-import {SelectionMode, SelectState} from 'react-stately/useSelectState';
+import {SelectionMode, SelectState, ValueType} from 'react-stately/useSelectState';
 import {useFormReset} from '../utils/useFormReset';
 import {useFormValidation} from '../form/useFormValidation';
+import {useLayoutEffect} from '../utils/useLayoutEffect';
 import {useVisuallyHidden} from '../visually-hidden/VisuallyHidden';
+
+const UNSET = Symbol('unset');
 
 export interface AriaHiddenSelectProps {
   /**
@@ -92,7 +95,17 @@ export function useHiddenSelect<T, M extends SelectionMode = 'single'>(
     }
   });
 
-  useFormReset(props.selectRef, state.defaultValue, state.setValue);
+  let setValue = state.setValue;
+  // Native autofill/mobile interactions and form reset already update the control.
+  // Those paths must not synthesize a second change event, and a synthesized event
+  // must not feed back into setValue (multiple selection creates a new array).
+  let skipSyntheticChange = useRef(false);
+  let lastEmittedValue = useRef<ValueType<M> | typeof UNSET>(UNSET);
+
+  useFormReset(props.selectRef, state.defaultValue, value => {
+    skipSyntheticChange.current = true;
+    setValue(value);
+  });
   useFormValidation(
     {
       validationBehavior,
@@ -102,10 +115,14 @@ export function useHiddenSelect<T, M extends SelectionMode = 'single'>(
     props.selectRef
   );
 
-  let setValue = state.setValue;
   // Used for both onChange and onInput, so accept the common supertype of both event types.
   let onChange = useCallback(
     (e: React.SyntheticEvent<HTMLSelectElement>) => {
+      if (skipSyntheticChange.current) {
+        return;
+      }
+
+      skipSyntheticChange.current = true;
       let eventTarget = getEventTarget(e) as HTMLSelectElement;
       if (eventTarget.multiple) {
         setValue(Array.from(eventTarget.selectedOptions, option => option.value) as any);
@@ -115,6 +132,35 @@ export function useHiddenSelect<T, M extends SelectionMode = 'single'>(
     },
     [setValue]
   );
+
+  // Programmatic value updates (ListBox, keyboard, typeahead) do not emit a native
+  // change event. Dispatch one after the hidden control has committed so <form onChange> works.
+  useLayoutEffect(() => {
+    let select = props.selectRef?.current;
+    if (lastEmittedValue.current === UNSET) {
+      lastEmittedValue.current = state.value;
+      return;
+    }
+
+    if (isSameSelectValue(lastEmittedValue.current, state.value)) {
+      return;
+    }
+
+    lastEmittedValue.current = state.value;
+
+    if (skipSyntheticChange.current) {
+      skipSyntheticChange.current = false;
+      return;
+    }
+
+    if (!select) {
+      return;
+    }
+
+    skipSyntheticChange.current = true;
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    skipSyntheticChange.current = false;
+  }, [props.selectRef, state.value]);
 
   // In Safari, the <select> cannot have `display: none` or `hidden` for autofill to work.
   // In Firefox, there must be a <label> to identify the <select> whereas other browsers
@@ -243,4 +289,14 @@ export function HiddenSelect<T, M extends SelectionMode = 'single'>(
   }
 
   return null;
+}
+
+function isSameSelectValue(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+      return false;
+    }
+    return a.every((item, i) => Object.is(item, b[i]));
+  }
+  return Object.is(a, b);
 }
